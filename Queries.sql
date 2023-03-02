@@ -160,17 +160,22 @@ division
 product_code 
 product total_sold_quantity*/
 
-select division, product_code, sold_quantity
-from 
-	(select a.division, b.sold_quantity, b.product_code,
-	ROW_NUMBER() OVER (PARTITION BY a.division ORDER BY b.sold_quantity DESC) rn
-	from dim_product a
-     	right join
-	(select product_code, 
-	sum(sold_quantity) as sold_quantity 
-	from fact_sales_monthly 
-	where year(date)=2021 
-	group by product_code) b
-on a.product_code=b.product_code 
-order by sold_quantity desc) t
+select division, product_code, sold_quantity, RANK () OVER (PARTITION BY division ORDER BY sold_quantity)
+	from (
+	select a.division, b.sold_quantity, b.product_code, ROW_NUMBER() OVER (PARTITION BY a.division ORDER BY b.sold_quantity DESC) rn
+	from 
+		dim_product a
+	right join
+		(select a.product_code, a.sold_quantity, b.product from 
+		(select product_code, 
+		sum(sold_quantity) as sold_quantity 
+		from fact_sales_monthly 
+		where year(date)=2021 
+		group by product_code) a
+		left join
+		(select product,product_code from dim_product) b
+		on a.product_code=b.product_code) b
+	on a.product_code=b.product_code 
+	order by sold_quantity desc
+	) t
 WHERE rn <= 3;
