@@ -158,11 +158,13 @@ group by channel) a;
 The final output contains these fields, 
 division 
 product_code 
-product total_sold_quantity*/
+product
+product total_sold_quantity
+rank*/
 
-select division, product_code, sold_quantity, RANK () OVER (PARTITION BY division ORDER BY sold_quantity)
+select division, product_code, product, sold_quantity, RANK () OVER (PARTITION BY division ORDER BY sold_quantity)
 	from (
-	select a.division, b.sold_quantity, b.product_code, ROW_NUMBER() OVER (PARTITION BY a.division ORDER BY b.sold_quantity DESC) rn
+	select a.division, b.sold_quantity, b.product_code, b.product, ROW_NUMBER() OVER (PARTITION BY a.division ORDER BY b.sold_quantity DESC) rn
 	from 
 		dim_product a
 	right join
