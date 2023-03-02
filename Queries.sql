@@ -162,7 +162,7 @@ product
 product total_sold_quantity
 rank*/
 
-select division, product_code, product, sold_quantity, RANK () OVER (PARTITION BY division ORDER BY sold_quantity)
+select division, product_code, product, sold_quantity, RANK () OVER (PARTITION BY division ORDER BY sold_quantity) as ranking
 	from (
 	select a.division, b.sold_quantity, b.product_code, b.product, ROW_NUMBER() OVER (PARTITION BY a.division ORDER BY b.sold_quantity DESC) rn
 	from 
